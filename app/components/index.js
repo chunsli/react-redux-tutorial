@@ -1,6 +1,7 @@
 import React from 'react';
 import FilterLink from './FilterLink';
 import TodoList from './TodoList';
+import AddTodo from './AddTodo';
 
 export default class TodoApp extends React.Component {
 
@@ -24,24 +25,16 @@ export default class TodoApp extends React.Component {
     };
     const props = this.props;
     const { store, visibilityFilter, todos } = props;
-    const visibleTodos = getVisibleTodos(
-      todos,
-      visibilityFilter
-    );
     return (
       <div>
-        <input ref={node => {
-					this.input = node;
-				}} />
-        <button onClick = { () => {
-					store.dispatch({
-						type: 'ADD_TODO',
-						text: this.input.value
-					});
-					this.input.value = '';
-				}}>
-          Add Todo
-        </button>
+        <AddTodo
+          onAddClick={text =>
+            store.dispatch({
+              type: 'ADD_TODO',
+              text
+            })
+          }
+        />
         <TodoList
           todos={
             getVisibleTodos(
