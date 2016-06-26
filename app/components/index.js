@@ -1,7 +1,7 @@
 import React from 'react';
-import FilterLink from './FilterLink';
 import TodoList from './TodoList';
 import AddTodo from './AddTodo';
+import Footer from './Footer';
 
 export default class TodoApp extends React.Component {
 
@@ -49,32 +49,16 @@ export default class TodoApp extends React.Component {
             })
           }
         />
-        <p>
-          Show: {' '}
-          <FilterLink
-            store={store}
-            filter='SHOW_ALL'
-            currentFilter={visibilityFilter}
-          >
-            All
-          </FilterLink>
-          {' '}
-          <FilterLink
-            store={store}
-            filter='SHOW_ACTIVE'
-            currentFilter={visibilityFilter}
-          >
-            Active
-          </FilterLink>
-          {' '}
-          <FilterLink
-            store={store}
-            filter='SHOW_COMPLETED'
-            currentFilter={visibilityFilter}
-          >
-            Completed
-          </FilterLink>
-        </p>
+        <Footer
+          visibilityFilter={visibilityFilter}
+          onFilterClick={filter => 
+            store.dispatch({
+              type: 'SET_VISIBILITY_FILTER',
+              filter
+            })
+          }
+        />
+        
       </div>
     )
   }

@@ -3,23 +3,20 @@ import React from 'react';
 class FilterLink extends React.Component {
   render() {
     const {
-      store,
       filter,
       currentFilter,
-      children
+      children,
+      onClick
     } = this.props;
 
-    if (filter === currentFilter) {
+    if(filter === currentFilter){
       return <span>{children}</span>
     }
     return (
       <a href='#'
          onClick={e => {
 				e.preventDefault();
-				store.dispatch({
-					type: 'SET_VISIBILITY_FILTER',
-					filter
-				});
+				onClick(filter);
 			}}
       >
         {children}
