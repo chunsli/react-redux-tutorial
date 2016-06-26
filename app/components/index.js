@@ -4,7 +4,6 @@ export default class TodoApp extends React.Component {
   render() {
     const props = this.props;
     const { store } = props;
-    let nextTodoId = 0;
     return (
       <div>
         <input ref={node => {
@@ -13,8 +12,7 @@ export default class TodoApp extends React.Component {
         <button onClick = { () => {
 					store.dispatch({
 						type: 'ADD_TODO',
-						text: this.input.value,
-						id: nextTodoId++
+						text: this.input.value
 					});
 					this.input.value = '';
 				}}>
