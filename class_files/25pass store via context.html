@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>JS Bin</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/redux/3.0.4/redux.js"></script>
+<script src="https://fb.me/react-0.14.0.js"></script>
+<script src="https://fb.me/react-dom-0.14.0.js"></script>
+<script src="https://fb.me/JSXTransformer-0.13.3.js"></script>
+<script src="https://wzrd.in/standalone/expect@latest"></script>
+<script src="https://wzrd.in/standalone/deep-freeze@latest"></script>
+<script type="text/jsx">
+
+const todo = (state, action) => {
+	switch (action.type) {
+		case 'ADD_TODO':
+			return {
+					id		: action.id,
+					text	: action.text,
+					completed: false
+				}
+		case 'TOGGLE_TODO':
+			if (state.id !== action.id) {
+				return state;
+			} else {
+				return Object.assign(
+						{},
+						state,				
+						{completed: !state.completed}
+					)
+			}
+		
+		default:
+			return state;
+	}
+}
+
+const todos = (state = [], action) => {
+	switch (action.type) {
+		case 'ADD_TODO':
+			return state.concat(
+				todo(state, action)
+				);
+		case 'TOGGLE_TODO':
+			return state.map(t => todo(t, action));	
+		default:
+			return state;
+	}
+};
+
+const visibilityFilter = (
+	state = 'SHOW_ALL',
+	action
+) => {
+	switch (action.type) {
+		case 'SET_VISIBILITY_FILTER':
+			return action.filter;
+		default:
+			return state;
+	}
+};
+
+//implement combine reducer from scratch
+
+const { combineReducers } = Redux;
+const todoApp = combineReducers({
+	todos,
+	visibilityFilter
+});
+
+
+const { Component } = React;
+
+const Link = ({
+	active,
+	children,
+	onClick
+}) => {
+	if(active){
+		return <span>{children}</span>
+	}
+	return (
+		<a href='#'
+			onClick={e => {
+				e.preventDefault();
+				onClick();
+			}}
+		>
+			{children}
+		</a>
+	)
+
+}
+
+class FilterLink extends Component {
+	componentDidMount() {
+		const { store } = this.context;
+		this.unsubscribe = store.subscribe(() =>
+			this.forceUpdate()
+		);
+	}
+
+	componentWillUnmount() {
+		this.unsubscribe();
+	}
+
+	render() {
+		const props = this.props;
+		const { store } = this.context;
+		const state = store.getState();
+		return(
+			<Link
+				active = {
+					props.filter ===
+					state.visibilityFilter
+				}
+				onClick={() => 
+					store.dispatch({
+						type: 'SET_VISIBILITY_FILTER',
+						filter: props.filter
+					})
+				}
+			>
+				{props.children}
+			</Link>
+		);
+	}
+}
+
+FilterLink.contextTypes = {
+	store: React.PropTypes.object
+};
+
+const Footer = () => (
+	<p>
+		Show: {' '}
+		<FilterLink
+			filter='SHOW_ALL'
+		>
+			All
+		</FilterLink>
+		{', '}
+		<FilterLink
+			filter='SHOW_ACTIVE'
+		>
+			Active
+		</FilterLink>
+		{', '}
+		<FilterLink
+			filter='SHOW_COMPLETED'
+		>
+			Completed
+		</FilterLink>
+	</p>
+)
+
+const Todo = ({
+	onClick,
+	completed,
+	text
+}) => (
+	<li 
+		onClick={onClick}
+		style={{
+			textDecoration:
+			completed ? 
+				'line-through' :
+				'none'
+	}}>
+		{text}
+	</li>
+)
+
+class VisibleTodoList extends Component {
+	componentDidMount() {
+		const { store } = this.context;
+		this.unsubscribe = store.subscribe(() =>
+			this.forceUpdate()
+		)
+	}
+	componentWillUnmount() {
+		this.unsubscribe();
+	}
+
+	render() {
+		const props = this.props;
+		const { store } = this.context;
+		const state = store.getState();
+
+		return(
+			<TodoList
+				todos={
+					getVisibleTodos(
+						state.todos,
+						state.visibilityFilter
+					)
+				}
+				onTodoClick={id =>
+					store.dispatch({
+						type: 'TOGGLE_TODO',
+						id
+					})
+				}
+			/>
+		)
+	}
+}
+
+// the receivinig context proptypes must be specified as well
+VisibleTodoList.contextTypes = {
+	store: React.PropTypes.object
+};
+
+const getVisibleTodos = (
+	todos,
+	filter
+) => {
+	switch (filter) {
+		case 'SHOW_ALL' : 
+			return todos;
+		case 'SHOW_COMPLETED':
+			return todos.filter(
+				t => t.completed
+			);
+		case 'SHOW_ACTIVE':
+			return todos.filter(
+				t => !t.completed
+			);
+
+	}
+}
+
+const TodoList = ({
+	todos,
+	onTodoClick
+}) => (
+	<ul>
+		{todos.map(todo =>
+			<Todo
+				key={todo.id}
+				{...todo}
+				onClick={() => onTodoClick(todo.id)}
+			/>
+		)}
+	</ul>
+)
+
+// for functional components, the second argument is the context
+// { store } in the second argument is getting store from context.store
+const AddTodo = (props, { store }) => {
+	let input;
+	return (
+		<div>
+			<input ref={node => {
+				input = node;
+			}} />
+			<button onClick = { () => {
+				store.dispatch({
+					type: 'ADD_TODO',
+					id: nextTodoId++,
+					text: input.value
+				})
+				input.value = '';
+			}}>
+				Add Todo
+			</button>
+		</div>
+	)
+}
+
+// still need to specify the contextTypes
+AddTodo.contextTypes = {
+	store: React.PropTypes.object
+}
+
+
+let nextTodoId = 0;
+
+const TodoApp = () => (
+	<div>
+		<AddTodo />
+		<VisibleTodoList />
+		<Footer />
+	</div>
+)
+
+// using context will allow every child to receive store as a props
+// this store will be part of the context for all children
+// now we only need to declare context types and obtain store through context
+// and not passed through intermediary components
+class Provider extends Component {
+	getChildContext() {
+		return {
+			store: this.props.store
+		};
+	}
+
+	render() {
+		return this.props.children;
+	}
+}
+
+// childContextTypes must be specificied for child to receive props
+Provider.childContextTypes = {
+	store: React.PropTypes.object
+};
+
+const { createStore } = Redux;
+
+ReactDOM.render(
+	<Provider store={createStore(todoApp)}>
+		<TodoApp />
+	</Provider>,
+	document.getElementById('root')
+);
+
+</script>
+</head>
+<body>
+  <div id='root'></div>
+</body>
+</html>

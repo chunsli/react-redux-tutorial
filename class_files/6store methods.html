@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>JS Bin</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/redux/3.0.4/redux.js"></script>
+<script src="https://fb.me/react-0.14.0.js"></script>
+<script src="https://fb.me/react-dom-0.14.0.js"></script>
+<script src="https://fb.me/JSXTransformer-0.13.3.js"></script>
+<script src="https://wzrd.in/standalone/expect@latest"></script>
+<script src="https://wzrd.in/standalone/deep-freeze@latest"></script>
+<script type="text/jsx">
+
+const counter = (state = 0, action) => {
+	switch(action.type) {
+		case 'INCREMENT':
+			return state + 1;
+		case 'DECREMENT' : 
+			return state - 1;
+		default:
+			return state;
+	}
+}
+
+const { createStore } = Redux;
+//var createStore = Redux.createStore;
+//import { createStore } = from 'redux';
+
+//store holds current state, dispatch actions, when created need to specific the reducers, how state is updated with actions
+
+//1 this is the reducer -> specfies how actions update the state
+const store = createStore(counter);
+
+console.log(store.getState());
+
+//2 dispatch actions to change state of application
+store.dispatch({type:'INCREMENT'});
+console.log(store.getState());
+
+//3 subscribe registers a callback, which willl be called any time an action has been dispatched
+const render = () => {
+	document.body.innerText = store.getState();
+}
+store.subscribe(render);
+//render the first time;
+render();
+
+document.addEventListener('click', () => {
+	store.dispatch({ type: 'INCREMENT'});
+})
+
+</script>
+</head>
+<body>
+  <div id='root'></div>
+</body>
+</html>
