@@ -1,26 +1,30 @@
 import React from 'react';
+import { connect } from 'react-redux';
 
-class FilterLink extends React.Component {
-  render() {
-    const {
-      onAddClick
-    } = this.props;
-    
-    let input;
-    return (
-      <div>
-        <input ref={node => {
-					input = node;
-				}} />
-        <button onClick = { () => {
-					onAddClick(input.value);
-					input.value = '';
-				}}>
-          Add Todo
-        </button>
-      </div>
-    )
+let nextTodoId = 0;
+const addTodo = (text) => {
+  return {
+    type: 'ADD_TODO',
+    id: nextTodoId++,
+    text
   }
-}
+};
 
-export default FilterLink;
+const AddTodo = ({ dispatch }) => {
+  let input;
+  return (
+    <div>
+      <input ref={node => {
+				input = node;
+			}} />
+      <button onClick = { () => {
+				dispatch(addTodo(input.value));
+				input.value = '';
+			}}>
+        Add Todo
+      </button>
+    </div>
+  )
+};
+
+export default connect()(AddTodo);

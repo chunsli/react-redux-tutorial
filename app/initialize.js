@@ -1,5 +1,6 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
+import { Provider } from 'react-redux';
 import { createStore } from 'redux';
 import reducers from './reducers/';
 import TodoApp from './components/';
@@ -20,10 +21,9 @@ if (module.hot) {
 
 const load = () => {
   ReactDOM.render(
-    <TodoApp
-      store={store}
-      {...store.getState()}
-    />,
+    <Provider store={ store }>
+      <TodoApp />
+    </Provider>,
     document.getElementById('root')
   );
 };
