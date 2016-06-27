@@ -1,12 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-
-const setVisibilityFilter = (filter) => {
-  return {
-    type: 'SET_VISIBILITY_FILTER',
-    filter
-  };
-};
+import { setVisibilityFilter } from '../actions';
 
 const Link = ({
   active,
