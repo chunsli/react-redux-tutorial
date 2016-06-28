@@ -1,5 +1,5 @@
 import React from 'react';
-import VisibleTodoList from './VisibleTodoList';
+import TodoList from './TodoList';
 import AddTodo from './AddTodo';
 import Footer from './Footer';
 
@@ -9,7 +9,7 @@ export default class TodoApp extends React.Component {
     return (
       <div>
         <AddTodo />
-        <VisibleTodoList />
+        <TodoList />
         <Footer />
       </div>
     )
